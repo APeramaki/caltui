@@ -1,0 +1,8 @@
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
+
+[workspace]
+members = [
+    "caltui_engine",
+]
+resolver = "2"
