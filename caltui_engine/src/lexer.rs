@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::ast::BinaryOp;
+use crate::ast::{BinaryOp, UnaryOp};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
@@ -26,7 +26,23 @@ pub enum Associativity {
     Right,
 }
 
+pub enum Operator {
+    Binary(BinaryOp),
+    Unary(UnaryOp),
+}
+
+    
 impl Token {
+    pub fn as_operator(&self) -> Option<Operator> {
+        self.as_binary_op()
+            .map(Operator::Binary)
+            .or_else(|| self.as_unary_op().map(Operator::Unary))
+    }
+
+    pub fn as_unary_op(&self) -> Option<UnaryOp> {
+        // To be filled
+        None
+    }
     pub fn as_binary_op(&self) -> Option<BinaryOp> {
         match self {
             Token::Caret => Some(BinaryOp::Exponent),

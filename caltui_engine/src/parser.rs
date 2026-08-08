@@ -1,9 +1,9 @@
-use std::{borrow::Borrow, cmp::Ordering};
+use std::{borrow::Borrow, cmp::Ordering, todo};
 
 use crate::{
     ast::{self, BinaryOp, Expr},
     lexer::{
-        Associativity,
+        Associativity, Operator,
         Token::{self, Identifier},
     },
 };
@@ -35,13 +35,8 @@ impl Parser {
         let mut stack: Vec<Expr> = Vec::new();
 
         for token in rpn {
-            match token {
-                Token::Number(n) => {
-                    stack.push(Expr::Literal(ast::Value::Number(ast::Number { value: n })));
-                }
-
-                t if t.as_binary_op().is_some() => {
-                    let op = t.as_binary_op().unwrap();
+            match token.as_operator() {
+                Some(Operator::Binary(op)) => {
                     let rhs = stack.pop().ok_or(ParseError::MissingOperand)?;
                     let lhs = stack.pop().ok_or(ParseError::MissingOperand)?;
 
@@ -51,7 +46,15 @@ impl Parser {
                         rhs: Box::new(rhs),
                     });
                 }
-                _ => todo!(),
+
+                Some(Operator::Unary(_op)) => todo!(),
+
+                None => match token {
+                    Token::Number(n) => {
+                        stack.push(Expr::Literal(ast::Value::Number(ast::Number { value: n })));
+                    }
+                    _ => todo!(),
+                },
             }
         }
 
@@ -82,10 +85,8 @@ impl Parser {
                 Token::Identifier(s) => output.push(Token::Identifier(s.into())),
 
                 Token::Plus | Token::Minus | Token::Star | Token::Slash | Token::Caret => {
-                    
                     // Pop ops from operator stack if
                     while let Some(from_op_stack) = operator_stack.last() {
-                        
                         // 1. it's not left parenthesis
                         if from_op_stack != &Token::LeftParen
                         // 2. op in stack has higher precedence
@@ -119,7 +120,7 @@ impl Parser {
                 Token::Function(_) => operator_stack.push(token.clone()),
             }
         }
-        
+
         // pop op stack on output
         while let Some(token) = operator_stack.pop() {
             if token == Token::LeftParen {
