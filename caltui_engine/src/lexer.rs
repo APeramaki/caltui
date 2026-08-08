@@ -21,7 +21,7 @@ pub enum Token {
 }
 
 #[derive(PartialEq)]
-pub enum Assosiativity {
+pub enum Associativity {
     Left,
     Right,
 }
@@ -31,14 +31,14 @@ impl Token {
         match self {
             Token::Caret => Some(BinaryOp::Exponent),
             Token::Plus => Some(BinaryOp::Addition),
-            Token::Minus => Some(BinaryOp::Substraction),
+            Token::Minus => Some(BinaryOp::Subtraction),
             Token::Star => Some(BinaryOp::Multiplication),
             Token::Slash => Some(BinaryOp::Division),
             _ => None,
         }
     }
 
-    pub fn has_greater_precedence(&self, other: &Token) -> Ordering {
+    pub fn precedence_cmp(&self, other: &Token) -> Ordering {
         self.get_precedence().cmp(&other.get_precedence())
     }
     fn get_precedence(&self) -> i8 {
@@ -56,10 +56,10 @@ impl Token {
             | Token::Whitespace => 0,
         }
     }
-    pub fn get_associativity(&self) -> Assosiativity {
+    pub fn get_associativity(&self) -> Associativity {
         match self {
-            Token::Caret => Assosiativity::Right,
-            _ => Assosiativity::Left,
+            Token::Caret => Associativity::Right,
+            _ => Associativity::Left,
         }
     }
 }

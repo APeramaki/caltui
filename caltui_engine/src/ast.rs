@@ -12,7 +12,7 @@ pub enum UnaryOp {
 #[derive(Debug, PartialEq)]
 pub enum BinaryOp {
     Addition,
-    Substraction,
+    Subtraction,
     Multiplication,
     Division,
     Exponent,

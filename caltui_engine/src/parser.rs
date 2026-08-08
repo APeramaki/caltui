@@ -3,15 +3,11 @@ use std::{borrow::Borrow, cmp::Ordering};
 use crate::{
     ast::{self, BinaryOp, Expr},
     lexer::{
-        Assosiativity,
+        Associativity,
         Token::{self, Identifier},
     },
 };
-pub struct OperatorTemplate {
-    op: Option<Token>,
-    lhs: Option<Token>,
-    rhs: Option<Token>,
-}
+
 pub enum ParseError {
     MissingParenthesis,
     MissingOperand,
@@ -30,7 +26,7 @@ impl Parser {
     }
     // Build AST with Shunting yard algorithm
     pub fn build_ast(&self, tokens: Vec<Token>) -> Result<Expr, ParseError> {
-        let rpn = self.tokens_to_reverse_polish_notatation(tokens)?;
+        let rpn = self.tokens_to_reverse_polish_notation(tokens)?;
 
         self.rpn_to_ast(rpn)
     }
@@ -45,12 +41,13 @@ impl Parser {
                 }
 
                 t if t.as_binary_op().is_some() => {
+                    let op = t.as_binary_op().unwrap();
                     let rhs = stack.pop().ok_or(ParseError::MissingOperand)?;
                     let lhs = stack.pop().ok_or(ParseError::MissingOperand)?;
 
                     stack.push(Expr::Binary {
                         lhs: Box::new(lhs),
-                        op: t.as_binary_op().unwrap(),
+                        op,
                         rhs: Box::new(rhs),
                     });
                 }
@@ -64,7 +61,7 @@ impl Parser {
 
         Ok(stack.pop().unwrap())
     }
-    pub fn tokens_to_reverse_polish_notatation(
+    pub fn tokens_to_reverse_polish_notation(
         &self,
         tokens: Vec<Token>,
     ) -> Result<Vec<Token>, ParseError> {
@@ -85,17 +82,17 @@ impl Parser {
                 Token::Identifier(s) => output.push(Token::Identifier(s.into())),
 
                 Token::Plus | Token::Minus | Token::Star | Token::Slash | Token::Caret => {
-                    println!("Operator token found");
+                    
                     // Pop ops from operator stack if
                     while let Some(from_op_stack) = operator_stack.last() {
-                        println!("while loop start");
+                        
                         // 1. it's not left parenthesis
                         if from_op_stack != &Token::LeftParen
                         // 2. op in stack has higher precedence
-                            && (from_op_stack.has_greater_precedence(token) == Ordering::Greater
+                            && (from_op_stack.precedence_cmp(token) == Ordering::Greater
                             // 3. same precedence and token has left assotiativity
-                                || (from_op_stack.has_greater_precedence(token) == Ordering::Equal
-                                    && token.get_associativity() == Assosiativity::Left))
+                                || (from_op_stack.precedence_cmp(token) == Ordering::Equal
+                                    && token.get_associativity() == Associativity::Left))
                         {
                             if let Some(popped) = operator_stack.pop() {
                                 output.push(popped);
@@ -122,11 +119,10 @@ impl Parser {
                 Token::Function(_) => operator_stack.push(token.clone()),
             }
         }
-        println!("{}", operator_stack.len());
+        
         // pop op stack on output
         while let Some(token) = operator_stack.pop() {
             if token == Token::LeftParen {
-                println!("parenthesis error");
                 return Err(ParseError::MissingParenthesis);
             }
             output.push(token.clone());
