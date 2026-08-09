@@ -8,6 +8,7 @@ use crate::{
     },
 };
 
+#[derive(Debug, PartialEq)]
 pub enum ParseError {
     MissingParenthesis,
     MissingOperand,

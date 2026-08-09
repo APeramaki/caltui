@@ -1,12 +1,29 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, todo};
 
-use crate::ast::{Expr, Number};
+use crate::{
+    ast::{Expr, OperatorError, Value}, lexer::lexer, parser::{ParseError, Parser},
+};
+
 
 #[derive(Debug, PartialEq)]
 pub enum CalcError {
-    UnknownError,
-    ParseIntError,
+    Parse(ParseError),
+    Evaluation(OperatorError),
+    NotANumber,
 }
+
+impl From<ParseError> for CalcError {
+    fn from(err: ParseError) -> Self {
+        CalcError::Parse(err)
+    }
+}
+
+impl From<OperatorError> for CalcError {
+    fn from(err: OperatorError) -> Self {
+        CalcError::Evaluation(err)
+    }
+}
+
 pub struct Calculator {
     variables: HashMap<String, Expr>,
 }
@@ -23,10 +40,32 @@ impl Calculator {
         }
     }
 
-    pub fn execute(&mut self, input: &str) -> Result<Number, CalcError> {
-        input
-            .parse()
-            .map(|x| Number { value: x })
-            .map_err(|_| CalcError::ParseIntError)
+    pub fn execute(&mut self, input: &str) -> Result<Value, CalcError> {
+        let parser = Parser::new();
+        let r = parser.build_ast(lexer(input))?;
+        match evaluate(r)? {
+            Value::Number(value) => Ok(Value::Number(value))
+        }
+        
     }
+}
+
+pub fn evaluate(expr: Expr) -> Result<Value, OperatorError> {
+    match expr {
+        Expr::Literal(value) => Ok(value),
+        Expr::Variable(_) => todo!(),
+        Expr::Unary { op: _, expr: _ } => todo!(),
+        Expr::Binary { lhs, op, rhs } => {
+            let lhs = evaluate(*lhs);
+            let rhs = evaluate(*rhs);
+            match op {
+                crate::ast::BinaryOp::Addition => lhs? + rhs?,
+                crate::ast::BinaryOp::Subtraction => todo!(), // lhs - rhs,
+                crate::ast::BinaryOp::Multiplication => todo!(), //  lhs * rhs,
+                crate::ast::BinaryOp::Division => todo!(), //  lhs / rhs,
+                crate::ast::BinaryOp::Exponent => todo!(), //  lhs.pow(rhs),
+            }
+        }
+    }
+    // Err(OperatorError::UnknownOperatorError)
 }
