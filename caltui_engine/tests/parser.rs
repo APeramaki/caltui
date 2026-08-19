@@ -21,7 +21,7 @@ mod tests {
         let parser = Parser::new();
         let input = vec![Token::Number(3), Token::Plus, Token::Number(4)];
         let result = parser
-            .tokens_to_reverse_polish_notatation(input)
+            .tokens_to_reverse_polish_notation(input)
             .ok()
             .unwrap();
         let answer = vec![Token::Number(3), Token::Number(4), Token::Plus];
@@ -42,7 +42,7 @@ mod tests {
             Token::RightParen,
         ];
         let result = parser
-            .tokens_to_reverse_polish_notatation(input)
+            .tokens_to_reverse_polish_notation(input)
             .ok()
             .unwrap();
         let answer = vec![
