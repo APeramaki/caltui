@@ -1,9 +1,10 @@
 use std::{collections::HashMap, todo};
 
 use crate::{
-    ast::{Expr, OperatorError, Value}, lexer::lexer, parser::{ParseError, Parser},
+    ast::{Expr, OperatorError, Value},
+    lexer::lexer,
+    parser::{ParseError, Parser},
 };
-
 
 #[derive(Debug, PartialEq)]
 pub enum CalcError {
@@ -44,9 +45,8 @@ impl Calculator {
         let parser = Parser::new();
         let r = parser.build_ast(lexer(input))?;
         match evaluate(r)? {
-            Value::Number(value) => Ok(Value::Number(value))
+            Value::Number(value) => Ok(Value::Number(value)),
         }
-        
     }
 }
 
@@ -56,14 +56,14 @@ pub fn evaluate(expr: Expr) -> Result<Value, OperatorError> {
         Expr::Variable(_) => todo!(),
         Expr::Unary { op: _, expr: _ } => todo!(),
         Expr::Binary { lhs, op, rhs } => {
-            let lhs = evaluate(*lhs);
-            let rhs = evaluate(*rhs);
+            let lhs = evaluate(*lhs)?;
+            let rhs = evaluate(*rhs)?;
             match op {
-                crate::ast::BinaryOp::Addition => lhs? + rhs?,
-                crate::ast::BinaryOp::Subtraction => todo!(), // lhs - rhs,
-                crate::ast::BinaryOp::Multiplication => todo!(), //  lhs * rhs,
-                crate::ast::BinaryOp::Division => todo!(), //  lhs / rhs,
-                crate::ast::BinaryOp::Exponent => todo!(), //  lhs.pow(rhs),
+                crate::ast::BinaryOp::Addition => lhs + rhs,
+                crate::ast::BinaryOp::Subtraction => lhs - rhs, // lhs - rhs,
+                crate::ast::BinaryOp::Multiplication => lhs * rhs, // lhs * rhs,
+                crate::ast::BinaryOp::Division => lhs / rhs,    // lhs / rhs,
+                crate::ast::BinaryOp::Exponent => todo!(),      // lhs.pow(rhs),
             }
         }
     }

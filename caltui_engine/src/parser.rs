@@ -1,7 +1,7 @@
-use std::{borrow::Borrow, cmp::Ordering, todo};
+use std::{cmp::Ordering, todo};
 
 use crate::{
-    ast::{self, BinaryOp, Expr},
+    ast::{self, Expr},
     lexer::{
         Associativity, Operator,
         Token::{self, Identifier},
