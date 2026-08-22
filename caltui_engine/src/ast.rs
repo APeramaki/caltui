@@ -61,7 +61,7 @@ pub enum Expr {
 impl Number {
     fn checked_op(
         self,
-        rhs: Number,
+        rhs: &Number,
         op: fn(u64, u64) -> Option<u64>,
         err: OperatorError,
     ) -> Result<Number, OperatorError> {
@@ -77,7 +77,7 @@ macro_rules! impl_number_op {
         impl ops::$trait<Number> for Number {
             type Output = Result<Number, OperatorError>;
             fn $method(self, rhs: Number) -> Self::Output {
-                self.checked_op(rhs, $checked, $err)
+                self.checked_op(&rhs, $checked, $err)
             }
         }
     };

@@ -22,11 +22,12 @@ impl Default for Parser {
     }
 }
 impl Parser {
+    #[must_use]
     pub fn new() -> Self {
         Self {}
     }
     // Build AST with Shunting yard algorithm
-    pub fn build_ast(&self, tokens: Vec<Token>) -> Result<Expr, ParseError> {
+    pub fn build_ast(&self, tokens: &[Token]) -> Result<Expr, ParseError> {
         let rpn = self.tokens_to_reverse_polish_notation(tokens)?;
 
         self.rpn_to_ast(rpn)
@@ -59,15 +60,14 @@ impl Parser {
             }
         }
 
-        if stack.len() != 1 {
-            return Err(ParseError::InvalidExpression);
+        match stack.pop() {
+            Some(expr) if stack.is_empty() => Ok(expr),
+            _ => Err(ParseError::InvalidExpression),
         }
-
-        Ok(stack.pop().unwrap())
     }
     pub fn tokens_to_reverse_polish_notation(
         &self,
-        tokens: Vec<Token>,
+        tokens: &[Token],
     ) -> Result<Vec<Token>, ParseError> {
         let mut output: Vec<Token> = Vec::new();
         let mut operator_stack: Vec<Token> = Vec::new();
@@ -80,7 +80,7 @@ impl Parser {
                 Token::Identifier(ident)
                     if tokens.peek().is_some_and(|t| **t == Token::LeftParen) =>
                 {
-                    output.push(Token::Function(ident.to_string()))
+                    output.push(Token::Function(ident.to_string()));
                 }
 
                 Token::Identifier(s) => output.push(Token::Identifier(s.into())),
@@ -103,7 +103,7 @@ impl Parser {
                             break;
                         }
                     }
-                    operator_stack.push(token.clone())
+                    operator_stack.push(token.clone());
                 }
                 Token::LeftParen => operator_stack.push(Token::LeftParen),
                 Token::RightParen => loop {

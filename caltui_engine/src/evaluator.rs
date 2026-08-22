@@ -2,7 +2,7 @@ use std::{collections::HashMap, todo};
 
 use crate::{
     ast::{Expr, OperatorError, Value},
-    lexer::lexer,
+    lexer::{LexerError, lexer},
     parser::{ParseError, Parser},
 };
 
@@ -10,9 +10,15 @@ use crate::{
 pub enum CalcError {
     Parse(ParseError),
     Evaluation(OperatorError),
+    Lexer(LexerError),
     NotANumber,
 }
 
+impl From<LexerError> for CalcError {
+    fn from(err: LexerError) -> Self {
+        CalcError::Lexer(err)
+    }
+}
 impl From<ParseError> for CalcError {
     fn from(err: ParseError) -> Self {
         CalcError::Parse(err)
@@ -26,7 +32,7 @@ impl From<OperatorError> for CalcError {
 }
 
 pub struct Calculator {
-    variables: HashMap<String, Expr>,
+    _variables: HashMap<String, Expr>,
 }
 
 impl Default for Calculator {
@@ -35,15 +41,16 @@ impl Default for Calculator {
     }
 }
 impl Calculator {
+    #[must_use]
     pub fn new() -> Self {
         Self {
-            variables: HashMap::new(),
+            _variables: HashMap::new(),
         }
     }
 
     pub fn execute(&mut self, input: &str) -> Result<Value, CalcError> {
         let parser = Parser::new();
-        let r = parser.build_ast(lexer(input))?;
+        let r = parser.build_ast(&lexer(input)?)?;
         match evaluate(r)? {
             Value::Number(value) => Ok(Value::Number(value)),
         }
@@ -60,12 +67,11 @@ pub fn evaluate(expr: Expr) -> Result<Value, OperatorError> {
             let rhs = evaluate(*rhs)?;
             match op {
                 crate::ast::BinaryOp::Addition => lhs + rhs,
-                crate::ast::BinaryOp::Subtraction => lhs - rhs, // lhs - rhs,
-                crate::ast::BinaryOp::Multiplication => lhs * rhs, // lhs * rhs,
-                crate::ast::BinaryOp::Division => lhs / rhs,    // lhs / rhs,
-                crate::ast::BinaryOp::Exponent => todo!(),      // lhs.pow(rhs),
+                crate::ast::BinaryOp::Subtraction => lhs - rhs,
+                crate::ast::BinaryOp::Multiplication => lhs * rhs,
+                crate::ast::BinaryOp::Division => lhs / rhs,
+                crate::ast::BinaryOp::Exponent => todo!(), // lhs.pow(rhs),
             }
         }
     }
-    // Err(OperatorError::UnknownOperatorError)
 }

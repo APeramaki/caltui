@@ -1,6 +1,11 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, todo};
 
 use crate::ast::{BinaryOp, UnaryOp};
+
+#[derive(Debug, PartialEq)]
+pub enum LexerError {
+    InvalidNumber,
+}
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
@@ -31,7 +36,6 @@ pub enum Operator {
     Unary(UnaryOp),
 }
 
-    
 impl Token {
     pub fn as_operator(&self) -> Option<Operator> {
         self.as_binary_op()
@@ -39,11 +43,12 @@ impl Token {
             .or_else(|| self.as_unary_op().map(Operator::Unary))
     }
 
-    pub fn as_unary_op(&self) -> Option<UnaryOp> {
+    fn as_unary_op(&self) -> Option<UnaryOp> {
         // To be filled
-        None
+        todo!()
     }
-    pub fn as_binary_op(&self) -> Option<BinaryOp> {
+
+    fn as_binary_op(&self) -> Option<BinaryOp> {
         match self {
             Token::Caret => Some(BinaryOp::Exponent),
             Token::Plus => Some(BinaryOp::Addition),
@@ -54,6 +59,7 @@ impl Token {
         }
     }
 
+    #[must_use]
     pub fn precedence_cmp(&self, other: &Token) -> Ordering {
         self.get_precedence().cmp(&other.get_precedence())
     }
@@ -72,6 +78,7 @@ impl Token {
             | Token::Whitespace => 0,
         }
     }
+    #[must_use]
     pub fn get_associativity(&self) -> Associativity {
         match self {
             Token::Caret => Associativity::Right,
@@ -80,9 +87,8 @@ impl Token {
     }
 }
 
-pub fn lexer(input: &str) -> Vec<Token> {
+pub fn lexer(input: &str) -> Result<Vec<Token>, LexerError> {
     let mut tokens: Vec<Token> = Vec::new();
-    // let mut current = "";
 
     let mut chars = input.chars().peekable();
 
@@ -96,22 +102,21 @@ pub fn lexer(input: &str) -> Vec<Token> {
             '/' => Token::Slash,
             '^' => Token::Caret,
             x if x.is_ascii_digit() => {
-                let mut number: u64 = x.to_digit(10).unwrap_or(0).into();
-                while chars.peek().is_some_and(|n| n.is_ascii_digit()) {
-                    number = number * 10 + chars.next().unwrap().to_digit(10).unwrap_or(0) as u64;
-                }
-                Token::Number(number)
+                let digits: String = std::iter::once(x)
+                    .chain(chars.by_ref().take_while(char::is_ascii_digit))
+                    .collect();
+
+                Token::Number(digits.parse().map_err(|_| LexerError::InvalidNumber)?)
             }
             x if x.is_whitespace() => continue,
             x => {
-                let mut ident = String::from(x);
-                while chars.peek().is_some_and(|n| n.is_alphabetic()) {
-                    ident.push(chars.next().unwrap());
-                }
+                let ident: String = std::iter::once(x)
+                    .chain(chars.by_ref().take_while(|n| n.is_alphabetic()))
+                    .collect();
                 Token::Identifier(ident)
             }
         };
         tokens.push(token);
     }
-    tokens
+    Ok(tokens)
 }
