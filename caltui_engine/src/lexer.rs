@@ -31,6 +31,7 @@ pub enum Associativity {
     Right,
 }
 
+#[derive(Debug, PartialEq)]
 pub enum Operator {
     Binary(BinaryOp),
     Unary(UnaryOp),
@@ -45,7 +46,7 @@ impl Token {
 
     fn as_unary_op(&self) -> Option<UnaryOp> {
         // To be filled
-        todo!()
+        None
     }
 
     fn as_binary_op(&self) -> Option<BinaryOp> {

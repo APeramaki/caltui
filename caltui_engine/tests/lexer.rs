@@ -1,4 +1,4 @@
-use caltui_engine::{ast::BinaryOp, lexer::lexer};
+use caltui_engine::{ast::BinaryOp, lexer::Operator, lexer::lexer};
 #[cfg(test)]
 mod tests {
     use caltui_engine::lexer::Token;
@@ -9,17 +9,18 @@ mod tests {
     fn number() {
         let result = lexer("5");
 
-        assert_eq!(result, vec![Token::Number(5)]);
+        assert_eq!(result, Ok(vec![Token::Number(5)]));
     }
     #[test]
     fn operator() {
         let result = lexer("+");
 
-        assert_eq!(result, vec![Token::Plus]);
+        assert_eq!(result, Ok(vec![Token::Plus]));
+
         assert_eq!(
-            result.first().unwrap().as_binary_op(),
-            Some(BinaryOp::Addition)
-        )
+            result.unwrap().first().unwrap().as_operator(),
+            Some(Operator::Binary(BinaryOp::Addition))
+        );
     }
 
     #[test]
@@ -28,7 +29,7 @@ mod tests {
 
         assert_eq!(
             result,
-            vec![Token::Number(1), Token::Plus, Token::Number(2)]
+            Ok(vec![Token::Number(1), Token::Plus, Token::Number(2)])
         );
     }
 
@@ -38,11 +39,11 @@ mod tests {
 
         assert_eq!(
             result,
-            vec![
+            Ok(vec![
                 Token::Number(1),
                 Token::Star,
                 Token::Identifier("g".to_string())
-            ]
+            ])
         );
     }
 
@@ -52,7 +53,7 @@ mod tests {
 
         assert_eq!(
             result,
-            vec![Token::Number(1), Token::Star, Token::Number(123)]
+            Ok(vec![Token::Number(1), Token::Star, Token::Number(123)])
         );
     }
     #[test]
@@ -61,13 +62,13 @@ mod tests {
 
         assert_eq!(
             result,
-            vec![
+            Ok(vec![
                 Token::Number(1),
                 Token::Star,
                 Token::Identifier(String::from("abc")),
                 Token::Plus,
                 Token::Number(123)
-            ]
+            ])
         );
     }
 }
