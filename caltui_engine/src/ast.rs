@@ -1,4 +1,4 @@
-use std::{ops, println, todo};
+use std::{ops, todo};
 
 #[derive(Debug, PartialEq)]
 pub enum OperatorError {
@@ -64,7 +64,7 @@ impl Rational {
     #[must_use]
     pub fn new(numerator: i64, denumerator: i64) -> Self {
         let gcd = greatest_common_divisor(numerator, denumerator) as i64;
-        println!("NEW: numerator: {numerator}, denumerator: {denumerator}, gcd: {gcd}");
+
         Self {
             numerator: numerator / gcd,
             denumerator: denumerator / gcd,
@@ -149,7 +149,14 @@ macro_rules! impl_value_op {
                     (Value::Frac(lhs), Value::Frac(rhs)) => {
                         Ok(Value::Frac(ops::$trait::$method(lhs, rhs)))
                     }
-                    _ => Err(OperatorError::UnknownOperatorError),
+                    (Value::Integer(lhs), Value::Frac(rhs)) => {
+                        let lhs_as_frac = Rational::new(lhs, 1);
+                        Ok(Value::Frac(ops::$trait::$method(lhs_as_frac, rhs)))
+                    }
+                    (Value::Frac(lhs), Value::Integer(rhs)) => {
+                        let rhs_as_frac = Rational::new(rhs, 1);
+                        Ok(Value::Frac(ops::$trait::$method(lhs, rhs_as_frac)))
+                    } //_ =>  Err(OperatorError::UnknownOperatorError),
                 }
             }
         }

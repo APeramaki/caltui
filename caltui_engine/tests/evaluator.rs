@@ -10,7 +10,7 @@ mod tests {
         ast::{
             BinaryOp::{Division, Multiplication, Subtraction},
             Expr,
-            Value::Frac,
+            Value::{Frac, Integer},
         },
         evaluator::evaluate,
     };
@@ -33,7 +33,6 @@ mod tests {
             }),
         };
         let output = evaluate(input).ok().unwrap();
-        println!("{output:#?}");
         let answer = Value::Integer(18);
         assert_eq!(output, answer);
     }
@@ -86,6 +85,32 @@ mod tests {
         };
         let output = evaluate(input);
         let answer = Value::Frac(Rational::new(-1, 4));
+
+        assert_eq!(output, Ok(answer));
+    }
+
+    #[test]
+    fn evaluate_add_of_integer_and_fractional() {
+        let input: Expr = Expr::Binary {
+            lhs: Box::new(Literal(Integer(2))),
+            op: Addition,
+            rhs: Box::new(Literal(Frac(Rational::new(11, 4)))),
+        };
+        let output = evaluate(input);
+        let answer = Value::Frac(Rational::new(19, 4));
+
+        assert_eq!(output, Ok(answer));
+    }
+
+    #[test]
+    fn evaluate_add_of_fractional_and_integer() {
+        let input: Expr = Expr::Binary {
+            lhs: Box::new(Literal(Frac(Rational::new(11, 4)))),
+            op: Addition,
+            rhs: Box::new(Literal(Integer(2))),
+        };
+        let output = evaluate(input);
+        let answer = Value::Frac(Rational::new(19, 4));
 
         assert_eq!(output, Ok(answer));
     }
