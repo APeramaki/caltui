@@ -1,7 +1,7 @@
 use caltui_engine::ast::Expr::Literal;
 use caltui_engine::ast::{
     BinaryOp::{Addition, Multiplication},
-    Number, Value,
+    Value,
 };
 
 use caltui_engine::lexer::Token;
@@ -9,10 +9,7 @@ use caltui_engine::lexer::Token;
 #[cfg(test)]
 mod tests {
 
-    use caltui_engine::{
-        ast::{self, Expr},
-        parser::Parser,
-    };
+    use caltui_engine::{ast::Expr, parser::Parser};
 
     use super::*;
 
@@ -73,15 +70,15 @@ mod tests {
 
         let correct = Expr::Binary {
             lhs: Box::new(Expr::Binary {
-                lhs: Box::new(Literal(ast::Value::Number(Number { value: 3 }))),
+                lhs: Box::new(Literal(Value::Integer(3))),
                 op: Addition,
-                rhs: Box::new(Literal(Value::Number(Number { value: 4 }))),
+                rhs: Box::new(Literal(Value::Integer(4))),
             }),
             op: Multiplication,
             rhs: Box::new(Expr::Binary {
-                lhs: Box::new(Literal(Value::Number(Number { value: 5 }))),
+                lhs: Box::new(Literal(Value::Integer(5))),
                 op: Addition,
-                rhs: Box::new(Literal(Value::Number(Number { value: 6 }))),
+                rhs: Box::new(Literal(Value::Integer(6))),
             }),
         };
         assert_eq!(result.ok(), Some(correct));

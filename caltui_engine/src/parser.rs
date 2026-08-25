@@ -53,7 +53,7 @@ impl Parser {
 
                 None => match token {
                     Token::Number(n) => {
-                        stack.push(Expr::Literal(ast::Value::Number(ast::Number { value: n })));
+                        stack.push(Expr::Literal(ast::Value::Integer(n)));
                     }
                     _ => todo!(),
                 },

@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, todo};
+use std::cmp::Ordering;
 
 use crate::ast::{BinaryOp, UnaryOp};
 
@@ -9,7 +9,7 @@ pub enum LexerError {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
-    Number(u64),
+    Number(i64),
     Identifier(String),
 
     Plus,

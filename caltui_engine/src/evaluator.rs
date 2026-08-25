@@ -52,7 +52,8 @@ impl Calculator {
         let parser = Parser::new();
         let r = parser.build_ast(&lexer(input)?)?;
         match evaluate(r)? {
-            Value::Number(value) => Ok(Value::Number(value)),
+            Value::Integer(value) => Ok(Value::Integer(value)),
+            Value::Frac(value) => Ok(Value::Frac(value)),
         }
     }
 }
