@@ -51,10 +51,7 @@ impl Calculator {
     pub fn execute(&mut self, input: &str) -> Result<Value, CalcError> {
         let parser = Parser::new();
         let r = parser.build_ast(&lexer(input)?)?;
-        match evaluate(r)? {
-            Value::Integer(value) => Ok(Value::Integer(value)),
-            Value::Frac(value) => Ok(Value::Frac(value)),
-        }
+        Ok(evaluate(r)?)
     }
 }
 

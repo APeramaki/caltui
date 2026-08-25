@@ -30,8 +30,8 @@ pub enum BinaryOp {
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Rational {
-    pub numerator: i64,
-    pub denumerator: i64,
+    numerator: i64,
+    denumerator: i64,
     // units...
 }
 
@@ -88,6 +88,8 @@ impl ops::Mul for Rational {
 
 impl ops::Div for Rational {
     type Output = Self;
+    #[allow(clippy::suspicious_arithmetic_impl)]
+    // Mathematically sound
     fn div(self, rhs: Self) -> Self::Output {
         self * Self {
             numerator: rhs.denumerator,

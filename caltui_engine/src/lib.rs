@@ -18,6 +18,6 @@ mod tests {
             Err(evaluator::CalcError::Parse(
                 parser::ParseError::MissingOperand
             ))
-        )
+        );
     }
 }
