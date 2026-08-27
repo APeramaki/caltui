@@ -8,7 +8,7 @@ mod tests {
 
     use caltui_engine::{
         ast::{
-            BinaryOp::{Division, Multiplication, Subtraction},
+            BinaryOp::{Division, Exponent, Multiplication, Subtraction},
             Expr,
             Value::{Frac, Integer},
         },
@@ -45,7 +45,8 @@ mod tests {
             rhs: Box::new(Literal(Frac(Rational::new(10, 4)))),
         };
         let output = evaluate(input);
-        let answer = Value::Frac(Rational::new(5, 1));
+        // 5/2 + 10/4 reduces to a whole number, so it collapses to an Integer.
+        let answer = Value::Integer(5);
 
         assert_eq!(output, Ok(answer));
     }
@@ -113,5 +114,38 @@ mod tests {
         let answer = Value::Frac(Rational::new(19, 4));
 
         assert_eq!(output, Ok(answer));
+    }
+
+    #[test]
+    fn evaluate_integer_pow() {
+        let input: Expr = Expr::Binary {
+            lhs: Box::new(Literal(Integer(2))),
+            op: Exponent,
+            rhs: Box::new(Literal(Integer(3))),
+        };
+        let answer = Value::Integer(8);
+        assert_eq!(evaluate(input), Ok(answer));
+    }
+
+    #[test]
+    fn evaluate_integer_third_root() {
+        let input = Expr::Binary {
+            lhs: Box::new(Literal(Integer(8))),
+            op: Exponent,
+            rhs: Box::new(Expr::Literal(Value::Frac(Rational::new(1, 3)))),
+        };
+        let answer = Value::Integer(2);
+        assert_eq!(evaluate(input), Ok(answer));
+    }
+
+    #[test]
+    fn evaluate_fractional_base_to_fractional_power() {
+        let input = Expr::Binary {
+            lhs: Box::new(Literal(Frac(Rational::new(8, 27)))),
+            op: Exponent,
+            rhs: Box::new(Literal(Frac(Rational::new(2, 3)))),
+        };
+        let answer = Value::Frac(Rational::new(4, 9));
+        assert_eq!(evaluate(input), Ok(answer));
     }
 }

@@ -1,7 +1,11 @@
 use std::{collections::HashMap, todo};
 
 use crate::{
-    ast::{Expr, OperatorError, Value},
+    ast::{
+        Expr,
+        OperatorError::{self, DivisionByZero},
+        Value,
+    },
     lexer::{LexerError, lexer},
     parser::{ParseError, Parser},
 };
@@ -67,8 +71,12 @@ pub fn evaluate(expr: Expr) -> Result<Value, OperatorError> {
                 crate::ast::BinaryOp::Addition => lhs + rhs,
                 crate::ast::BinaryOp::Subtraction => lhs - rhs,
                 crate::ast::BinaryOp::Multiplication => lhs * rhs,
-                crate::ast::BinaryOp::Division => lhs / rhs,
-                crate::ast::BinaryOp::Exponent => todo!(), // lhs.pow(rhs),
+                crate::ast::BinaryOp::Division => match rhs {
+                    Value::Integer(0) => Err(DivisionByZero),
+                    Value::Frac(rhs) if rhs.is_zero() => Err(DivisionByZero),
+                    rhs => lhs / rhs,
+                },
+                crate::ast::BinaryOp::Exponent => lhs.pow(rhs),
             }
         }
     }
