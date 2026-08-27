@@ -5,10 +5,13 @@ pub mod parser;
 
 #[cfg(test)]
 mod tests {
+
+    use crate::ast::{Rational, Value};
+
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn minimal() {
         let mut calc = evaluator::Calculator::new();
         let result = calc.execute("5");
         let parse_error = calc.execute("+");
@@ -19,5 +22,20 @@ mod tests {
                 parser::ParseError::MissingOperand
             ))
         );
+    }
+
+    #[test]
+    fn parenthesis() {
+        let mut calc = evaluator::Calculator::new();
+        let result = calc.execute("(4*5)/2");
+        let answer = Ok(Value::Integer(10));
+        assert_eq!(result, answer);
+    }
+    #[test]
+    fn mixed_calculation() {
+        let mut calc = evaluator::Calculator::new();
+        let result = calc.execute("(8/27)^(2/3)");
+
+        assert_eq!(result, Ok(ast::Value::Frac(Rational::new(4, 9))));
     }
 }

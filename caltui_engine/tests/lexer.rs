@@ -71,4 +71,38 @@ mod tests {
             ])
         );
     }
+
+    #[test]
+    fn parenthesis() {
+        let result = lexer("(2+5)*2");
+        let answer = vec![
+            Token::LeftParen,
+            Token::Number(2),
+            Token::Plus,
+            Token::Number(5),
+            Token::RightParen,
+            Token::Star,
+            Token::Number(2),
+        ];
+        assert_eq!(result, Ok(answer));
+    }
+
+    #[test]
+    fn test_set_1() {
+        let result = lexer("(8/27)^(2/3)");
+        let answer = Ok(vec![
+            Token::LeftParen,
+            Token::Number(8),
+            Token::Slash,
+            Token::Number(27),
+            Token::RightParen,
+            Token::Caret,
+            Token::LeftParen,
+            Token::Number(2),
+            Token::Slash,
+            Token::Number(3),
+            Token::RightParen,
+        ]);
+        assert_eq!(result, answer);
+    }
 }

@@ -132,3 +132,71 @@ impl Parser {
         Ok(output)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::ast::{
+        BinaryOp::{Division, Exponent},
+        Value,
+    };
+
+    use super::*;
+    #[test]
+    fn test_set_1_rpn() {
+        let parser = Parser::new();
+        let input = vec![
+            Token::LeftParen,
+            Token::Number(8),
+            Token::Slash,
+            Token::Number(27),
+            Token::RightParen,
+            Token::Caret,
+            Token::LeftParen,
+            Token::Number(2),
+            Token::Slash,
+            Token::Number(3),
+            Token::RightParen,
+        ];
+        let result = parser.tokens_to_reverse_polish_notation(&input);
+        let answer = vec![
+            Token::Number(8),
+            Token::Number(27),
+            Token::Slash,
+            Token::Number(2),
+            Token::Number(3),
+            Token::Slash,
+            Token::Caret,
+        ];
+        assert_eq!(result, Ok(answer));
+    }
+
+    #[test]
+    fn test_set_1_ast() {
+        let parser = Parser::new();
+        let input = vec![
+            Token::Number(8),
+            Token::Number(27),
+            Token::Slash,
+            Token::Number(2),
+            Token::Number(3),
+            Token::Slash,
+            Token::Caret,
+        ];
+
+        let result = parser.rpn_to_ast(input);
+        let answer = Expr::Binary {
+            lhs: Box::new(Expr::Binary {
+                lhs: Box::new(Expr::Literal(Value::Integer(8))),
+                op: Division,
+                rhs: Box::new(Expr::Literal(Value::Integer(27))),
+            }),
+            op: Exponent,
+            rhs: Box::new(Expr::Binary {
+                lhs: Box::new(Expr::Literal(Value::Integer(2))),
+                op: Division,
+                rhs: Box::new(Expr::Literal(Value::Integer(3))),
+            }),
+        };
+        assert_eq!(result, Ok(answer));
+    }
+}
