@@ -103,17 +103,34 @@ pub fn lexer(input: &str) -> Result<Vec<Token>, LexerError> {
             '/' => Token::Slash,
             '^' => Token::Caret,
             x if x.is_ascii_digit() => {
-                let digits: String = std::iter::once(x)
-                    .chain(chars.by_ref().take_while(char::is_ascii_digit))
-                    .collect();
+                let mut digits = String::new();
+                digits.push(x);
+
+                while let Some(&c) = chars.peek() {
+                    if c.is_ascii_digit() {
+                        digits.push(c);
+                        chars.next(); // actually consume it
+                    } else {
+                        break;
+                    }
+                }
 
                 Token::Number(digits.parse().map_err(|_| LexerError::InvalidNumber)?)
             }
             x if x.is_whitespace() => continue,
             x => {
-                let ident: String = std::iter::once(x)
-                    .chain(chars.by_ref().take_while(|n| n.is_alphabetic()))
-                    .collect();
+                let mut ident = String::new();
+                ident.push(x);
+
+                while let Some(&c) = chars.peek() {
+                    if c.is_alphabetic() {
+                        ident.push(c);
+                        chars.next();
+                    } else {
+                        break;
+                    }
+                }
+
                 Token::Identifier(ident)
             }
         };
